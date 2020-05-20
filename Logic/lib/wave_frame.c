@@ -36,9 +36,10 @@ static inline void wave_frame_set(const uint8_t val)
 	if(val) LL_GPIO_SetOutputPin(ECTx_GPIO_Port, ECTx_Pin);
 	else LL_GPIO_ResetOutputPin(ECTx_GPIO_Port, ECTx_Pin);
 }
-
-void wave_frame_uart_send(void)
+// 过采样
+void wave_frame_uart_Oversampling(void)
 {
+	// 过采样发送
 	if((0==_wave_frame_uart._txl) || (_wave_frame_uart._txi>=_wave_frame_uart._txl))
 	{
 		if((_wave_frame_uart.txl>0) && (_wave_frame_uart.txi<_wave_frame_uart.txl))
@@ -68,7 +69,11 @@ void wave_frame_uart_send(void)
 			wave_frame_set(bit);
 			_wave_frame_uart._txi++;
 		}
-		else _wave_frame_uart.txi = 0;
+		else
+		{
+			_wave_frame_uart.txi = 0;
+			_wave_frame_uart.txl = 0;
+		}
 		return ;
 	}
 	if(_wave_frame_uart._txi<_wave_frame_uart._txl)
@@ -79,9 +84,42 @@ void wave_frame_uart_send(void)
 		wave_frame_set(bit);
 		_wave_frame_uart._txi++;
 	}
+	// 过采样接收
 }
 
-
+uint8_t _wave_frame_uart_send(const uint8_t data[], const uint8_t _len)
+{
+	// 正在发送
+	if(0!=_wave_frame_uart.txl) return 0;
+	// 数据太长
+	if(_len>sizeof(_wave_frame_uart.tx)) return 0;
+	memcpy(_wave_frame_uart.tx, data, _len);
+	_wave_frame_uart.txl = _len;
+	return _len;
+}
+// 将需要发送的长数据拆分
+uint16_t wave_frame_uart_send(const uint8_t data[], const uint16_t _len)
+{
+	uint16_t len;
+	uint16_t txl;
+	uint8_t _size = sizeof(_wave_frame_uart.tx);
+	len=0;
+	txl=0;
+	while(len<_len)
+	{
+		txl = _len - len;
+		if(txl>_size) txl=_size;
+		while(0==_wave_frame_uart_send(&data[len], txl));
+		len += txl;
+	}
+	// 正在发送
+	if(0!=_wave_frame_uart.txl) return 0;
+	// 数据太长
+	if(len>sizeof(_wave_frame_uart.tx)) return 0;
+	memcpy(_wave_frame_uart.tx, data, len);
+	_wave_frame_uart.txl = len;
+	return len;
+}
 
 /* TIM2 init function */
 void _wave_frame_uart_Init(const uint16_t baud)

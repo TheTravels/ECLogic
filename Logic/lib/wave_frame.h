@@ -26,7 +26,8 @@ struct wave_frame_uart{
 };
 
 //extern struct wave_frame_uart _wave_frame_uart;
-extern void wave_frame_uart_send(void);
+extern void wave_frame_uart_Oversampling(void);
 extern void _wave_frame_uart_Init(const uint16_t baud);
+extern uint16_t wave_frame_uart_send(const uint8_t data[], const uint16_t _len);
 
 #endif //_WAVE_FRAME_H_

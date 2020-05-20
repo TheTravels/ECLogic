@@ -208,7 +208,7 @@ void TIM2_IRQHandler(void)
 	{
 		LL_TIM_ClearFlag_UPDATE(TIM2);
 		//LL_GPIO_TogglePin(ECTx_GPIO_Port, ECTx_Pin);
-		wave_frame_uart_send();
+		wave_frame_uart_Oversampling();
 	}
 	//WRITE_REG(TIM2->SR, ~(0x00));
   /* USER CODE END TIM2_IRQn 0 */

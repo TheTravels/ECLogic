@@ -25,7 +25,7 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include "lib/wave_frame.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -65,7 +65,9 @@ void SystemClock_Config(void);
 int main(void)
 {
   /* USER CODE BEGIN 1 */
-
+	char data[358];
+	char chs[26] = "ABCDEFGHIJKLMN";
+	uint8_t i=0;
   /* USER CODE END 1 */
 
   /* MCU Configuration--------------------------------------------------------*/
@@ -97,6 +99,10 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
+	  memset(data, chs[i++&0x07], sizeof(data));
+	  data[sizeof(data)-2] = '\r';
+	  data[sizeof(data)-1] = '\n';
+	  wave_frame_uart_send((uint8_t*)data, sizeof(data));
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
